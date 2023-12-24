@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     // keep track of image index
     int image_number = 0;
 
-    // loop over images and convert dis-similar pixels to scalar(0,0,0)
+    // loop over images, leave dis-similar pixels black and keep similar pixels
     for (const auto &entry : fs::directory_iterator(test_input_path))
     {
         // read in the test image
@@ -87,25 +87,39 @@ int main(int argc, char *argv[])
         }
 
         // define blank output image of same shape and size as input image
-        // Mat output_image(image.rows, image.cols, CV_8UC3, cv::Scalar(0,0,0));
         Mat output_image(image.rows, image.cols, CV_8UC3, Vec3b(0, 0, 0));
 
-        for (int x = 0; x < image.cols; ++x)
+        // def an earlier stopping criteria to kill search early when no green pixels are found
+        int pixel_count = (image.cols * image.rows);
+        double momentum = 0.10 * pixel_count;
+
+        // begin search from the bottom of the image 
+        for (int y = image.rows; y > 0; --y)
         {
-            for (int y = 0; y < image.rows; ++y)
+            if (momentum < 0)
+            {
+                continue;
+            }
+
+            for (int x = image.cols; x > 0; --x)
             {
                 // take cosine similarity of this pixel and sample vector
                 Vec3b pixel(image.at<Vec3b>(y, x));
                 Vec3d pixel_d(pixel[0], pixel[1], pixel[2]);
                 
-                // if (cosine_similarity(reference_vector, pixel_d) > threshold * 1.005)
                 if (cosine_similarity(reference_vector, pixel_d) > threshold * 1)
                 {
                     output_image.at<Vec3b>(y, x) = pixel;
-                    // cout << cosine_similarity(reference_vector, pixel) << endl;
+                    momentum++;
+                }
+                
+                else 
+                {
+                    momentum--; 
                 }
             }
         }
+        
         // write test image to file
         string image_index = to_string(image_number);
         string file_name("/test_file_" + image_index + ".png");
