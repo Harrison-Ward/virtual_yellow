@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
         {
             if (momentum < 0)
             {
-                continue;
+                break;
             }
 
             for (int x = image.cols; x > 0; --x)
