@@ -42,6 +42,10 @@ int main(int argc, char *argv[])
                 continue; // Skip this iteration
             }
 
+            // convert the image to HSV
+            // Mat sample_image;
+            // cv::cvtColor(sample_image_bgr, sample_image, cv::COLOR_BGR2HSV);
+
             // store the image
             input_images.push_back(sample_image);
 
@@ -75,7 +79,7 @@ int main(int argc, char *argv[])
 
     // loop over images, leave dis-similar pixels black and keep similar pixels
     for (const auto &entry : fs::directory_iterator(test_input_path))
-    {
+    {   
         // read in the test image
         Mat image = imread(entry.path().string());
 
@@ -85,6 +89,13 @@ int main(int argc, char *argv[])
             cerr << "Error reading: " << entry.path().string() << endl;
             continue; // Skip this iteration
         }
+
+        // convert the image to HSV
+        // Mat image;
+        // cv::cvtColor(image_bgr, image, cv::COLOR_BGR2HSV);
+        
+        // start clock
+        auto start = chrono::high_resolution_clock::now();
 
         // define blank output image of same shape and size as input image
         Mat output_image(image.rows, image.cols, CV_8UC3, Vec3b(0, 0, 0));
@@ -107,7 +118,7 @@ int main(int argc, char *argv[])
                 Vec3b pixel(image.at<Vec3b>(y, x));
                 Vec3d pixel_d(pixel[0], pixel[1], pixel[2]);
                 
-                if (cosine_similarity(reference_vector, pixel_d) > threshold * 1)
+                if (cosine_similarity(reference_vector, pixel_d) > threshold)
                 {
                     output_image.at<Vec3b>(y, x) = pixel;
                     momentum++;
@@ -119,16 +130,22 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        
+
         // write test image to file
         string image_index = to_string(image_number);
         string file_name("/test_file_" + image_index + ".png");
         string file_output_path(output_path + file_name);
 
-        // write out file path
-        cout << "Image " << image_number << ": " << entry.path().string() << endl;
+        // stop clock
+        auto stop = chrono::high_resolution_clock::now();
 
         imwrite(file_output_path, output_image);
         image_number++;
+
+        // write out file path
+        cout << "Image " << image_number << ": " << entry.path().string() << endl;
+        // display time to generate
+        auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start).count();
+        cout << file_output_path << ": generated in: " << duration << " miliseconds\n" << endl;
     }
 }
