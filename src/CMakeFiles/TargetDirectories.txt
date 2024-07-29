@@ -1,0 +1,4 @@
+/Users/harrisonward/Desktop/CS/Git/virtual_yellow/src/CMakeFiles/background_fill.dir
+/Users/harrisonward/Desktop/CS/Git/virtual_yellow/src/CMakeFiles/background_fill_map.dir
+/Users/harrisonward/Desktop/CS/Git/virtual_yellow/src/CMakeFiles/edit_cache.dir
+/Users/harrisonward/Desktop/CS/Git/virtual_yellow/src/CMakeFiles/rebuild_cache.dir
